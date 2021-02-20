@@ -1,13 +1,17 @@
 <template>
-  <v-container @paste="pasteImage">
-    <v-card>
+  <v-container @paste="pasteImage" id="container">
+    <v-card v-show="src">
       <v-card-text>
-        <v-text-field v-model="range.start" step="10" thumb-label ticks
-          >start</v-text-field
-        >
-        <v-text-field v-model="range.end" step="10" thumb-label ticks
-          >end</v-text-field
-        >
+        <v-row>
+          <v-col cols="12" md="6" lg="6">
+            <v-text-field v-model="range.start" label="start">
+              start
+            </v-text-field>
+          </v-col>
+          <v-col cols="12" md="6" lg="6">
+            <v-text-field v-model="range.end" label="end">end</v-text-field>
+          </v-col>
+        </v-row>
       </v-card-text>
       <v-btn @click="draw()">draw</v-btn>
       <v-btn @click="process()">process</v-btn>
@@ -34,6 +38,7 @@ export default {
       start: 50,
       end: 100,
     },
+    value: 0,
     src: "",
   }),
   watch: {
@@ -232,3 +237,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+#container {
+  background: #cfd8dc;
+}
+</style>

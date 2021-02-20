@@ -1,6 +1,9 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
+    <h2>{{ msg }}</h2>
+    <p>グレー背景の個所に、画像をペーストしてください。</p>
+    <p>［DRAW］ボタンで画像を表示します。</p>
+    <p>［DRAW］ボタンで画像を表示します。</p>
   </div>
 </template>
 

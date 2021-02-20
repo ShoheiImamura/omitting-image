@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Description msg="長い画像を省略するやつ" />
+    <Description msg="omitting image" />
     <DrawingCanvas />
   </div>
 </template>
