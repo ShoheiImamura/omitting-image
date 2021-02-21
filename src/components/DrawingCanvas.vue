@@ -112,15 +112,90 @@ export default defineComponent({
       );
     };
 
+    /**
+     * 上部分を描画
+     */
+    const drawUpperImage = (context, image, start, canvasWidth) => {
+      context.drawImage(
+        image,
+        0,
+        0,
+        image.width,
+        start,
+        0,
+        0,
+        canvasWidth,
+        (start * canvasWidth) / image.width
+      );
+    };
+    /**
+     * 下部分を描画
+     */
+    const drawLowerImage = (context, image, start, end, canvasWidth) => {
+      context.drawImage(
+        image,
+        0,
+        end,
+        image.width,
+        image.height - end,
+        0,
+        (start * canvasWidth) / image.width,
+        canvasWidth,
+        //追加最後
+        ((image.height - end) * canvasWidth) / image.width
+      );
+    };
+
+    /**
+     * 中間部分を描画
+     */
+    const drawMiddleImage = (context, image, start, canvasWidth) => {
+      context.beginPath();
+      // 開始地点
+      context.moveTo(0, (start * canvasWidth) / image.width - 5);
+      // 波線（to右上）
+      for (var i = 0; i < 10; i++) {
+        var waveHeight1 = i % 2 == 0 ? 10 * 1 : 10 * -1;
+        // sin カーブ描画
+        context.quadraticCurveTo(
+          25 + i * (canvasWidth / 10),
+          (start * canvasWidth) / image.width + waveHeight1 - 5,
+          (i + 1) * (canvasWidth / 10),
+          (start * canvasWidth) / image.width - 5
+        );
+      }
+      // 直線（to右下）
+      context.lineTo(canvasWidth, (start * canvasWidth) / image.width + 5);
+      // 波線（to左下）
+      for (var j = 10; j > 0; j--) {
+        var waveHeight2 = j % 2 == 0 ? 10 * -1 : 10 * 1;
+
+        // sin カーブ描画
+        context.quadraticCurveTo(
+          25 + (j - 1) * (canvasWidth / 10),
+          (start * canvasWidth) / image.width + waveHeight2 + 5,
+          (j - 1) * (canvasWidth / 10),
+          (start * canvasWidth) / image.width + 5
+        );
+      }
+      // 直線（to左上）
+      context.lineTo(0, (start * canvasWidth) / image.width);
+      context.fillStyle = "rgb(255,255,255)";
+      context.fill();
+      // 枠線
+      context.strokeStyle = "gray";
+      context.stroke();
+    };
+
+    /**
+     * 画像を加工
+     */
     const process = () => {
       console.log("process");
       // キャンバスを初期化
       clearCanvas(processedCanvas.value);
       var processedImage = new Image();
       processedImage.src = src.value;
-      // 画像サイズ取得
-      var processedImageWidth = processedImage.width;
-      var processedImageHeight = processedImage.height;
 
       // 大小順番比較
       if (range.value.start > range.value.end) {
@@ -131,71 +206,33 @@ export default defineComponent({
       }
 
       // 上部分を描画
-      processedContext.value.drawImage(
+      drawUpperImage(
+        processedContext.value,
         processedImage,
-        0,
-        0,
-        processedImageWidth,
         range.value.start,
-        0,
-        0,
-        500,
-        (range.value.start * 500) / processedImageWidth
+        500
       );
+
       // 下部分を描画
-      processedContext.value.drawImage(
+      drawLowerImage(
+        processedContext.value,
         processedImage,
-        0,
+        range.value.start,
         range.value.end,
-        processedImageWidth,
-        processedImageHeight - range.value.end,
-        0,
-        (range.value.start * 500) / processedImageWidth,
-        500,
-        ((processedImageHeight - range.value.end) * 500) / processedImageWidth
+        500
       );
+
       // 間部分を描画;
-      processedContext.value.beginPath();
-      processedContext.value.moveTo(
-        0,
-        (range.value.start * 500) / processedImageWidth - 5
+      drawMiddleImage(
+        processedContext.value,
+        processedImage,
+        range.value.start,
+        500
       );
-      for (var i = 0; i < 10; i++) {
-        var waveHeight1 = i % 2 == 0 ? 10 * 1 : 10 * -1;
-
-        // sin カーブ描画
-        processedContext.value.quadraticCurveTo(
-          25 + i * 50,
-          (range.value.start * 500) / processedImageWidth + waveHeight1 - 5,
-          (i + 1) * 50,
-          (range.value.start * 500) / processedImageWidth - 5
-        );
-      }
-      processedContext.value.lineTo(
-        500,
-        (range.value.start * 500) / processedImageWidth + 5
-      );
-      for (var j = 10; j > 0; j--) {
-        var waveHeight2 = j % 2 == 0 ? 10 * -1 : 10 * 1;
-
-        // sin カーブ描画
-        processedContext.value.quadraticCurveTo(
-          25 + (j - 1) * 50,
-          (range.value.start * 500) / processedImageWidth + waveHeight2 + 5,
-          (j - 1) * 50,
-          (range.value.start * 500) / processedImageWidth + 5
-        );
-      }
-      processedContext.value.lineTo(
-        0,
-        (range.value.start * 500) / processedImageWidth
-      );
-
-      processedContext.value.fillStyle = "rgb(255,255,255)";
-      processedContext.value.fill();
-      processedContext.value.strokeStyle = "gray";
-      processedContext.value.stroke();
     };
+    /**
+     * 画像を添付
+     */
     const pasteImage = (event) => {
       console.log("called paste image()");
       event.preventDefault();
@@ -209,9 +246,7 @@ export default defineComponent({
       draw();
     };
     onMounted(() => {
-      // originalCanvas.value = this.$refs.originalCanvas;
       originalContext.value = originalCanvas.value.getContext("2d");
-      // processedCanvas.value = this.$refs.processedCanvas;
       processedContext.value = processedCanvas.value.getContext("2d");
       // event listener
       window.addEventListener("paste", this.pasteImage());
@@ -232,6 +267,9 @@ export default defineComponent({
       draw,
       process,
       pasteImage,
+      drawUpperImage,
+      drawLowerImage,
+      drawMiddleImage,
     };
   },
 });
