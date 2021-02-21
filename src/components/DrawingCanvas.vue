@@ -82,11 +82,8 @@ export default defineComponent({
       // 画像サイズ取得
       var processedImageWidth = processedImage.width;
       var processedImageHeight = processedImage.height;
-      // var imageAspectRatio = imageHeight / imageWidth;
-      // ↑のイメージ
 
       // 消去
-
       clearCanvas(processedCanvas.value);
       // 元イメージ描画
       processedContext.value.drawImage(
