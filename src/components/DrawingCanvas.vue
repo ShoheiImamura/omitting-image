@@ -73,6 +73,7 @@ export default defineComponent({
       // 画像サイズ取得
       var imageWidth = originalImage.width;
       var imageHeight = originalImage.height;
+      originalCanvas.value.height = (imageHeight * 500) / imageWidth;
       // 元イメージ描画
       originalContext.value.drawImage(
         originalImage,
@@ -92,6 +93,7 @@ export default defineComponent({
       // 画像サイズ取得
       var processedImageWidth = processedImage.width;
       var processedImageHeight = processedImage.height;
+      processedCanvas.value.height =  (processedImageHeight * 500) / processedImageWidth;
 
       // 元イメージ描画
       processedContext.value.drawImage(
@@ -203,6 +205,11 @@ export default defineComponent({
         range.value.end = tmpStart;
       }
 
+      // 画像サイズ取得
+      var processedImageWidth = processedImage.width;
+      var processedImageHeight = processedImage.height;
+      processedCanvas.value.height = ((processedImageHeight - (range.value.end - range.value.start)) * 500) / processedImageWidth;
+
       setTimeout(()=>{
         // 上部分を描画
         drawUpperImage(
@@ -228,7 +235,7 @@ export default defineComponent({
           range.value.start,
           500
         );
-      }, 10)
+      }, 100);
     };
     /**
      * 画像を添付
