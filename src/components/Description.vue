@@ -1,10 +1,14 @@
 <template>
   <div class="hello">
-    <h2>{{ msg }}</h2>
-    <p>グレー背景の個所に、画像をペーストしてください。</p>
-    <p>［DRAW］ボタンで画像を表示します。</p>
-    <p>［DPROCESS］ボタンで加工します。</p>
-    <p>右クリック「名前を付けて画像を保存」でダウンロードできます。</p>
+    <v-card>
+      <v-card-title>{{ msg }}<v-spacer></v-spacer><v-btn @click="show = !show">説明</v-btn></v-card-title>
+      <v-card-text v-show="show">
+        <p>グレー背景に、画像をペーストorドロップしてください。</p>
+        <p>省略したい箇所をクリックして画像の一部を省略できます。</p>
+        <p>［download］ボタンでダウンロードできます。</p>
+        <p>［original］ボタンで加工前の画像を表示できます。</p>
+      </v-card-text>
+    </v-card>
   </div>
 </template>
 
@@ -14,6 +18,11 @@ export default {
   props: {
     msg: String,
   },
+  data() {
+    return {
+      show: false
+    }
+  }
 };
 </script>
 

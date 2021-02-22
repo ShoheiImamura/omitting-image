@@ -1,23 +1,7 @@
 <template>
   <v-container @paste="pasteImage" id="container" @dragover="dragover" @drop.stop="dropImage">
-    <v-card v-show="src">
-      <v-card-text>
-        画像src: {{src}}
-        <v-row>
-          <v-col cols="12" md="6" lg="6">
-            <v-text-field v-model="range.start" label="start">
-              start
-            </v-text-field>
-          </v-col>
-          <v-col cols="12" md="6" lg="6">
-            <v-text-field v-model="range.end" label="end">end</v-text-field>
-          </v-col>
-        </v-row>
-      </v-card-text>
-      <v-btn @click="drawInitialCanvas()">draw</v-btn>
-      <v-btn @click="process()">process</v-btn>
-      <v-btn @click="downloadImage()">download</v-btn>
-    </v-card>
+      <v-btn v-show="src" @click="drawInitialCanvas()">original</v-btn>
+      <v-btn v-show="src" @click="downloadImage()">download</v-btn>
     <v-row>
       <v-col cols="12" md="6" lg="6" xl="6">
         original image
@@ -293,17 +277,12 @@ export default defineComponent({
      * マウスイベント
      */
     const mousedown = (mouseEvent) => {
-      console.log("mousedown")
       var clientRect = originalCanvas.value.getBoundingClientRect();
-      // console.log(clientRect.top)
-      console.log(mouseEvent.clientY - clientRect.top)
       range.value.start = (mouseEvent.clientY - clientRect.top ) / imageRatio.value
       range.value.end = (mouseEvent.clientY - clientRect.top) / imageRatio.value
     }
     const mouseup = (mouseEvent) => {
-      console.log("mouseup")
       var clientRect = originalCanvas.value.getBoundingClientRect();
-      console.log(mouseEvent.clientY - clientRect.top)
       range.value.end = (mouseEvent.clientY - clientRect.top) / imageRatio.value
       process()
     }
