@@ -2,6 +2,7 @@
   <v-container @paste="pasteImage" id="container">
     <v-card v-show="src">
       <v-card-text>
+        画像src: {{src}}
         <v-row>
           <v-col cols="12" md="6" lg="6">
             <v-text-field v-model="range.start" label="start">
@@ -13,7 +14,7 @@
           </v-col>
         </v-row>
       </v-card-text>
-      <v-btn @click="draw()">draw</v-btn>
+      <v-btn @click="drawInitialCanvas()">draw</v-btn>
       <v-btn @click="process()">process</v-btn>
     </v-card>
     <v-row>
@@ -35,6 +36,7 @@ import {
   ref,
   onMounted,
   onUnmounted,
+  watch,
 } from "@vue/composition-api";
 
 export default defineComponent({
@@ -52,18 +54,22 @@ export default defineComponent({
     const processedCanvas = ref();
     const originalContext = ref();
     const processedContext = ref();
-    // method
-    const draw = () => {
+
+    /**
+     * 最初の表示
+     */
+    const drawInitialCanvas = () => {
+      // canvas 初期化
+      clearCanvas(originalCanvas.value);
+      clearCanvas(processedCanvas.value);
       console.log("draw original image");
+      // Image インスタンス
       var originalImage = new Image();
       originalImage.src = src.value;
 
       // 画像サイズ取得
       var imageWidth = originalImage.width;
       var imageHeight = originalImage.height;
-
-      // 消去
-      clearCanvas(originalCanvas.value);
       // 元イメージ描画
       originalContext.value.drawImage(
         originalImage,
@@ -76,6 +82,7 @@ export default defineComponent({
         500,
         (imageHeight * 500) / imageWidth
       );
+
       console.log("draw processed image");
       var processedImage = new Image();
       processedImage.src = src.value;
@@ -83,8 +90,6 @@ export default defineComponent({
       var processedImageWidth = processedImage.width;
       var processedImageHeight = processedImage.height;
 
-      // 消去
-      clearCanvas(processedCanvas.value);
       // 元イメージ描画
       processedContext.value.drawImage(
         processedImage,
@@ -202,30 +207,32 @@ export default defineComponent({
         range.value.end = tmpStart;
       }
 
-      // 上部分を描画
-      drawUpperImage(
-        processedContext.value,
-        processedImage,
-        range.value.start,
-        500
-      );
+      setTimeout(()=>{
+        // 上部分を描画
+        drawUpperImage(
+          processedContext.value,
+          processedImage,
+          range.value.start,
+          500
+        );
 
-      // 下部分を描画
-      drawLowerImage(
-        processedContext.value,
-        processedImage,
-        range.value.start,
-        range.value.end,
-        500
-      );
+        // 下部分を描画
+        drawLowerImage(
+          processedContext.value,
+          processedImage,
+          range.value.start,
+          range.value.end,
+          500
+        );
 
-      // 間部分を描画;
-      drawMiddleImage(
-        processedContext.value,
-        processedImage,
-        range.value.start,
-        500
-      );
+        // 間部分を描画;
+        drawMiddleImage(
+          processedContext.value,
+          processedImage,
+          range.value.start,
+          500
+        );
+      }, 10)
     };
     /**
      * 画像を添付
@@ -240,7 +247,7 @@ export default defineComponent({
       // do something with url here
       src.value = blobUrl;
       console.log(blobUrl);
-      draw();
+      drawInitialCanvas();
     };
     onMounted(() => {
       originalContext.value = originalCanvas.value.getContext("2d");
@@ -252,6 +259,13 @@ export default defineComponent({
       window.removeEventListener("paste", this.pasteImage());
     });
 
+    watch(src, () => {
+      console.log("watch src change")
+      setTimeout(()=>{
+        drawInitialCanvas();
+      }, 100)
+    })
+
     // return
     return {
       range,
@@ -261,7 +275,7 @@ export default defineComponent({
       processedCanvas,
       originalContext,
       processedContext,
-      draw,
+      drawInitialCanvas,
       process,
       pasteImage,
       drawUpperImage,
