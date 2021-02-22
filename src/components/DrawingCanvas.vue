@@ -16,6 +16,7 @@
       </v-card-text>
       <v-btn @click="drawInitialCanvas()">draw</v-btn>
       <v-btn @click="process()">process</v-btn>
+      <v-btn @click="downloadImage()">download</v-btn>
     </v-card>
     <v-row>
       <v-col cols="12" md="6" lg="6" xl="6">
@@ -25,6 +26,7 @@
       <v-col cols="12" md="6" lg="6" xl="6">
         processed image
         <canvas width="500" height="1000" ref="processedCanvas"></canvas>
+        <a v-show="false" id="downloadLink" ref="downloadLink" download="canvas.png">download link</a>
       </v-col>
     </v-row>
   </v-container>
@@ -54,6 +56,7 @@ export default defineComponent({
     const processedCanvas = ref();
     const originalContext = ref();
     const processedContext = ref();
+    const downloadLink = ref();
 
     /**
      * 最初の表示
@@ -106,12 +109,6 @@ export default defineComponent({
     const clearCanvas = (canvas) => {
       var context = canvas.getContext("2d");
       context.clearRect(0, 0, canvas.width, canvas.height);
-      console.log(
-        "clear canvas width: ",
-        canvas.width,
-        " canvas.height: ",
-        canvas.height
-      );
     };
 
     /**
@@ -193,7 +190,6 @@ export default defineComponent({
      * 画像を加工
      */
     const process = () => {
-      console.log("process");
       // キャンバスを初期化
       clearCanvas(processedCanvas.value);
       var processedImage = new Image();
@@ -260,28 +256,29 @@ export default defineComponent({
         return
       }
       const file = files[0];
-      console.log(file);
       let fileUrl = window.URL.createObjectURL(file);
       src.value = fileUrl;
-      console.log(fileUrl);
       drawInitialCanvas();
     }
     const dragover = (event) =>{
       event.preventDefault();
-      console.log("over")
+    }
+    /**
+     * 画像をダウンロード
+     */
+    const downloadImage = () => {
+      let link = downloadLink.value;
+      link.href = processedCanvas.value.toDataURL();
+      link.click();
     }
     onMounted(() => {
       originalContext.value = originalCanvas.value.getContext("2d");
       processedContext.value = processedCanvas.value.getContext("2d");
-      // event listener
-      window.addEventListener("paste", this.pasteImage());
     });
     onUnmounted(() => {
-      window.removeEventListener("paste", this.pasteImage());
     });
 
     watch(src, () => {
-      console.log("watch src change")
       setTimeout(()=>{
         drawInitialCanvas();
       }, 100)
@@ -296,6 +293,7 @@ export default defineComponent({
       processedCanvas,
       originalContext,
       processedContext,
+      downloadLink,
       drawInitialCanvas,
       process,
       pasteImage,
@@ -304,6 +302,7 @@ export default defineComponent({
       drawMiddleImage,
       dropImage,
       dragover,
+      downloadImage,
     };
   },
 });
