@@ -21,8 +21,8 @@
     <v-row>
       <v-col cols="12" md="6" lg="6" xl="6">
         original image
-        <canvas width="500" height="1000" ref="originalCanvas"></canvas
-      ></v-col>
+        <canvas width="500" height="1000" ref="originalCanvas" @mousedown="mousedown" @mouseup="mouseup"></canvas>
+      </v-col>
       <v-col cols="12" md="6" lg="6" xl="6">
         processed image
         <canvas width="500" height="1000" ref="processedCanvas"></canvas>
@@ -57,6 +57,7 @@ export default defineComponent({
     const originalContext = ref();
     const processedContext = ref();
     const downloadLink = ref();
+    const imageRatio = ref();
 
     /**
      * 最初の表示
@@ -74,6 +75,9 @@ export default defineComponent({
       var imageWidth = originalImage.width;
       var imageHeight = originalImage.height;
       originalCanvas.value.height = (imageHeight * 500) / imageWidth;
+      // 比率取得
+      imageRatio.value = 500 / imageWidth;
+
       // 元イメージ描画
       originalContext.value.drawImage(
         originalImage,
@@ -108,8 +112,13 @@ export default defineComponent({
         (processedImageHeight * 500) / processedImageWidth
       );
     };
+    /**
+     * キャンバスを初期化
+     */
     const clearCanvas = (canvas) => {
       var context = canvas.getContext("2d");
+      canvas.width = 500;
+      canvas.height = 1000;
       context.clearRect(0, 0, canvas.width, canvas.height);
     };
 
@@ -208,7 +217,7 @@ export default defineComponent({
       // 画像サイズ取得
       var processedImageWidth = processedImage.width;
       var processedImageHeight = processedImage.height;
-      processedCanvas.value.height = ((processedImageHeight - (range.value.end - range.value.start)) * 500) / processedImageWidth;
+      processedCanvas.value.height = ((processedImageHeight) * 500) / processedImageWidth;
 
       setTimeout(()=>{
         // 上部分を描画
@@ -278,6 +287,26 @@ export default defineComponent({
       link.href = processedCanvas.value.toDataURL();
       link.click();
     }
+
+
+    /**
+     * マウスイベント
+     */
+    const mousedown = (mouseEvent) => {
+      console.log("mousedown")
+      var clientRect = originalCanvas.value.getBoundingClientRect();
+      // console.log(clientRect.top)
+      console.log(mouseEvent.clientY - clientRect.top)
+      range.value.start = (mouseEvent.clientY - clientRect.top ) / imageRatio.value
+      range.value.end = (mouseEvent.clientY - clientRect.top) / imageRatio.value
+    }
+    const mouseup = (mouseEvent) => {
+      console.log("mouseup")
+      var clientRect = originalCanvas.value.getBoundingClientRect();
+      console.log(mouseEvent.clientY - clientRect.top)
+      range.value.end = (mouseEvent.clientY - clientRect.top) / imageRatio.value
+      process()
+    }
     onMounted(() => {
       originalContext.value = originalCanvas.value.getContext("2d");
       processedContext.value = processedCanvas.value.getContext("2d");
@@ -296,12 +325,15 @@ export default defineComponent({
       range,
       value,
       src,
+      imageRatio,
       originalCanvas,
       processedCanvas,
       originalContext,
       processedContext,
       downloadLink,
       drawInitialCanvas,
+      mousedown,
+      mouseup,
       process,
       pasteImage,
       drawUpperImage,
