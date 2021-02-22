@@ -1,5 +1,5 @@
 <template>
-  <v-container @paste="pasteImage" id="container">
+  <v-container @paste="pasteImage" id="container" @dragover="dragover" @drop.stop="dropImage">
     <v-card v-show="src">
       <v-card-text>
         画像src: {{src}}
@@ -249,6 +249,27 @@ export default defineComponent({
       console.log(blobUrl);
       drawInitialCanvas();
     };
+    /**
+     * drop 画像を取得
+     */
+    const dropImage = (event)=> {
+      event.preventDefault();
+      const files = event.dataTransfer.files
+      if (files.length !== 1 || files[0].type.indexOf('image') !== 0) {
+        console.log("画像ファイルではありません。")
+        return
+      }
+      const file = files[0];
+      console.log(file);
+      let fileUrl = window.URL.createObjectURL(file);
+      src.value = fileUrl;
+      console.log(fileUrl);
+      drawInitialCanvas();
+    }
+    const dragover = (event) =>{
+      event.preventDefault();
+      console.log("over")
+    }
     onMounted(() => {
       originalContext.value = originalCanvas.value.getContext("2d");
       processedContext.value = processedCanvas.value.getContext("2d");
@@ -281,6 +302,8 @@ export default defineComponent({
       drawUpperImage,
       drawLowerImage,
       drawMiddleImage,
+      dropImage,
+      dragover,
     };
   },
 });
