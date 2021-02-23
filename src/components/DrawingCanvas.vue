@@ -4,6 +4,8 @@
     id="container"
     @dragover="dragover"
     @drop.stop="dropImage"
+    @mousemove="mousemove"
+    @mouseleave="mouseleave"
   >
     <v-btn v-show="src" @click="drawInitialCanvas()">original</v-btn>
     <v-btn v-show="src" @click="downloadImage()">download</v-btn>
@@ -62,6 +64,7 @@ export default defineComponent({
     const processedContext = ref();
     const downloadLink = ref();
     const imageRatio = ref();
+    const onSelecting = ref(false);
 
     /**
      * 最初の表示
@@ -276,12 +279,26 @@ export default defineComponent({
      * マウスイベント
      */
     const mousedown = (mouseEvent) => {
+      mouseEvent.preventDefault();
+      onSelecting.value = true;
       range.value.start = getYIndex(mouseEvent) / imageRatio.value;
       range.value.end = getYIndex(mouseEvent) / imageRatio.value;
     };
     const mouseup = (mouseEvent) => {
+      mouseEvent.preventDefault();
+      onSelecting.value = false;
       range.value.end = getYIndex(mouseEvent) / imageRatio.value;
       process();
+    };
+    const mouseleave = (mouseEvent) => {
+      mouseEvent.preventDefault();
+      onSelecting.value = false;
+    };
+    const mousemove = (mouseEvent) => {
+      mouseEvent.preventDefault();
+      if (onSelecting.value) {
+        console.log("mousemove");
+      }
     };
     // y 座標を取得
     const getYIndex = (mouseEvent) => {
@@ -306,6 +323,7 @@ export default defineComponent({
       value,
       src,
       imageRatio,
+      onSelecting,
       originalCanvas,
       processedCanvas,
       originalContext,
@@ -314,6 +332,8 @@ export default defineComponent({
       drawInitialCanvas,
       mousedown,
       mouseup,
+      mouseleave,
+      mousemove,
       getYIndex,
       process,
       pasteImage,
