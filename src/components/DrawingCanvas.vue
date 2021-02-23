@@ -94,28 +94,6 @@ export default defineComponent({
         500,
         (imageHeight * 500) / imageWidth
       );
-
-      console.log("draw processed image");
-      var processedImage = new Image();
-      processedImage.src = src.value;
-      // 画像サイズ取得
-      var processedImageWidth = processedImage.width;
-      var processedImageHeight = processedImage.height;
-      processedCanvas.value.height =
-        (processedImageHeight * 500) / processedImageWidth;
-
-      // 元イメージ描画
-      processedContext.value.drawImage(
-        processedImage,
-        0,
-        0,
-        processedImageWidth,
-        processedImageHeight,
-        0,
-        0,
-        500,
-        (processedImageHeight * 500) / processedImageWidth
-      );
     };
     /**
      * キャンバスを初期化
@@ -298,17 +276,17 @@ export default defineComponent({
      * マウスイベント
      */
     const mousedown = (mouseEvent) => {
-      var clientRect = originalCanvas.value.getBoundingClientRect();
-      range.value.start =
-        (mouseEvent.clientY - clientRect.top) / imageRatio.value;
-      range.value.end =
-        (mouseEvent.clientY - clientRect.top) / imageRatio.value;
+      range.value.start = getYIndex(mouseEvent) / imageRatio.value;
+      range.value.end = getYIndex(mouseEvent) / imageRatio.value;
     };
     const mouseup = (mouseEvent) => {
-      var clientRect = originalCanvas.value.getBoundingClientRect();
-      range.value.end =
-        (mouseEvent.clientY - clientRect.top) / imageRatio.value;
+      range.value.end = getYIndex(mouseEvent) / imageRatio.value;
       process();
+    };
+    // y 座標を取得
+    const getYIndex = (mouseEvent) => {
+      var clientRect = originalCanvas.value.getBoundingClientRect();
+      return mouseEvent.clientY - clientRect.top;
     };
     onMounted(() => {
       originalContext.value = originalCanvas.value.getContext("2d");
@@ -336,6 +314,7 @@ export default defineComponent({
       drawInitialCanvas,
       mousedown,
       mouseup,
+      getYIndex,
       process,
       pasteImage,
       drawUpperImage,
