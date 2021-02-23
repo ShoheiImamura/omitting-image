@@ -15,24 +15,38 @@
       >
       <v-col cols="12" md="6" lg="6" xl="6">
         original image
-        <canvas
-          width="500"
-          height="1000"
-          ref="originalCanvas"
-          @mousedown="mousedown"
-          @mouseup="mouseup"
-        ></canvas>
+        <div id="originalArea">
+          <canvas
+            width="500"
+            height="1000"
+            ref="originalCanvas"
+            id="originalCanvas"
+            @mousedown="mousedown"
+            @mouseup="mouseup"
+          ></canvas>
+          <canvas
+            width="500"
+            height="1000"
+            ref="originalOverlayCanvas"
+            id="originalOverlayCanvas"
+            @mousedown="mousedown"
+            @mouseup="mouseup"
+          >
+          </canvas>
+        </div>
       </v-col>
       <v-col cols="12" md="6" lg="6" xl="6">
         processed image
-        <canvas width="500" height="1000" ref="processedCanvas"></canvas>
-        <a
-          v-show="false"
-          id="downloadLink"
-          ref="downloadLink"
-          download="canvas.png"
-          >download link</a
-        >
+        <div>
+          <canvas width="500" height="1000" ref="processedCanvas"></canvas>
+          <a
+            v-show="false"
+            id="downloadLink"
+            ref="downloadLink"
+            download="canvas.png"
+            >download link</a
+          >
+        </div>
       </v-col>
     </v-row>
   </v-container>
@@ -59,8 +73,10 @@ export default defineComponent({
     const src = ref("");
 
     const originalCanvas = ref();
-    const processedCanvas = ref();
     const originalContext = ref();
+    const originalOverlayCanvas = ref();
+    const originalOverlayContext = ref();
+    const processedCanvas = ref();
     const processedContext = ref();
     const downloadLink = ref();
     const imageRatio = ref();
@@ -72,6 +88,7 @@ export default defineComponent({
     const drawInitialCanvas = () => {
       // canvas 初期化
       clearCanvas(originalCanvas.value);
+      clearCanvas(originalOverlayCanvas.value);
       clearCanvas(processedCanvas.value);
       console.log("draw original image");
       // Image インスタンス
@@ -233,6 +250,54 @@ export default defineComponent({
         );
       }, 100);
     };
+
+    /**
+     * 省略部分画像を選択
+     */
+    const selectImage = (mouseEvent) => {
+      // 初期化
+      clearCanvas(originalOverlayCanvas.value);
+      // 画像sizeを取得
+      var originalOverlayImage = new Image();
+      originalOverlayImage.src = src.value;
+
+      // 画像サイズ取得
+      var imageWidth = originalOverlayImage.width;
+      var imageHeight = originalOverlayImage.height;
+      originalOverlayCanvas.value.height = (imageHeight * 500) / imageWidth;
+
+      // clip 領域の値を取得
+      var mouseIndex = getYIndex(mouseEvent);
+      var startYIndex = range.value.start * imageRatio.value;
+      var start = startYIndex < mouseIndex ? startYIndex : mouseIndex;
+      var end = startYIndex < mouseIndex ? mouseIndex : startYIndex;
+      // clip 領域を作成
+
+      console.log("originalOverlayContext", originalOverlayContext.value);
+      originalOverlayContext.value.beginPath();
+      originalOverlayContext.value.moveTo(0, start);
+      originalOverlayContext.value.lineTo(500, start);
+      originalOverlayContext.value.lineTo(500, end);
+      originalOverlayContext.value.lineTo(0, end);
+      originalOverlayContext.value.closePath();
+      originalOverlayContext.value.clip();
+      // フィルター
+      originalOverlayContext.value.filter = "grayscale(100%) brightness(50%)";
+
+      // 元イメージ描画
+      originalOverlayContext.value.drawImage(
+        originalOverlayImage,
+        0,
+        0,
+        imageWidth,
+        imageHeight,
+        0,
+        0,
+        500,
+        (imageHeight * 500) / imageWidth
+      );
+    };
+
     /**
      * 画像を添付
      */
@@ -283,6 +348,8 @@ export default defineComponent({
       onSelecting.value = true;
       range.value.start = getYIndex(mouseEvent) / imageRatio.value;
       range.value.end = getYIndex(mouseEvent) / imageRatio.value;
+      // overlay reset
+      clearCanvas(originalOverlayCanvas.value);
     };
     const mouseup = (mouseEvent) => {
       mouseEvent.preventDefault();
@@ -298,6 +365,7 @@ export default defineComponent({
       mouseEvent.preventDefault();
       if (onSelecting.value) {
         console.log("mousemove");
+        selectImage(mouseEvent);
       }
     };
     // y 座標を取得
@@ -307,6 +375,9 @@ export default defineComponent({
     };
     onMounted(() => {
       originalContext.value = originalCanvas.value.getContext("2d");
+      originalOverlayContext.value = originalOverlayCanvas.value.getContext(
+        "2d"
+      );
       processedContext.value = processedCanvas.value.getContext("2d");
     });
     onUnmounted(() => {});
@@ -325,8 +396,10 @@ export default defineComponent({
       imageRatio,
       onSelecting,
       originalCanvas,
-      processedCanvas,
       originalContext,
+      originalOverlayCanvas,
+      originalOverlayContext,
+      processedCanvas,
       processedContext,
       downloadLink,
       drawInitialCanvas,
@@ -336,6 +409,7 @@ export default defineComponent({
       mousemove,
       getYIndex,
       process,
+      selectImage,
       pasteImage,
       drawUpperImage,
       drawLowerImage,
@@ -351,5 +425,14 @@ export default defineComponent({
 <style scoped>
 #container {
   background: #cfd8dc;
+}
+#originalArea {
+  position: relative;
+}
+#originalCanvas {
+  position: absolute;
+}
+#originalOverlayCanvas {
+  position: absolute;
 }
 </style>
