@@ -1,16 +1,33 @@
 <template>
-  <v-container @paste="pasteImage" id="container" @dragover="dragover" @drop.stop="dropImage">
-      <v-btn v-show="src" @click="drawInitialCanvas()">original</v-btn>
-      <v-btn v-show="src" @click="downloadImage()">download</v-btn>
+  <v-container
+    @paste="pasteImage"
+    id="container"
+    @dragover="dragover"
+    @drop.stop="dropImage"
+  >
+    <v-btn v-show="src" @click="drawInitialCanvas()">original</v-btn>
+    <v-btn v-show="src" @click="downloadImage()">download</v-btn>
     <v-row>
       <v-col cols="12" md="6" lg="6" xl="6">
         original image
-        <canvas width="500" height="1000" ref="originalCanvas" @mousedown="mousedown" @mouseup="mouseup"></canvas>
+        <canvas
+          width="500"
+          height="1000"
+          ref="originalCanvas"
+          @mousedown="mousedown"
+          @mouseup="mouseup"
+        ></canvas>
       </v-col>
       <v-col cols="12" md="6" lg="6" xl="6">
         processed image
         <canvas width="500" height="1000" ref="processedCanvas"></canvas>
-        <a v-show="false" id="downloadLink" ref="downloadLink" download="canvas.png">download link</a>
+        <a
+          v-show="false"
+          id="downloadLink"
+          ref="downloadLink"
+          download="canvas.png"
+          >download link</a
+        >
       </v-col>
     </v-row>
   </v-container>
@@ -81,7 +98,8 @@ export default defineComponent({
       // 画像サイズ取得
       var processedImageWidth = processedImage.width;
       var processedImageHeight = processedImage.height;
-      processedCanvas.value.height =  (processedImageHeight * 500) / processedImageWidth;
+      processedCanvas.value.height =
+        (processedImageHeight * 500) / processedImageWidth;
 
       // 元イメージ描画
       processedContext.value.drawImage(
@@ -201,9 +219,10 @@ export default defineComponent({
       // 画像サイズ取得
       var processedImageWidth = processedImage.width;
       var processedImageHeight = processedImage.height;
-      processedCanvas.value.height = ((processedImageHeight) * 500) / processedImageWidth;
+      processedCanvas.value.height =
+        (processedImageHeight * 500) / processedImageWidth;
 
-      setTimeout(()=>{
+      setTimeout(() => {
         // 上部分を描画
         drawUpperImage(
           processedContext.value,
@@ -248,21 +267,21 @@ export default defineComponent({
     /**
      * drop 画像を取得
      */
-    const dropImage = (event)=> {
+    const dropImage = (event) => {
       event.preventDefault();
-      const files = event.dataTransfer.files
-      if (files.length !== 1 || files[0].type.indexOf('image') !== 0) {
-        console.log("画像ファイルではありません。")
-        return
+      const files = event.dataTransfer.files;
+      if (files.length !== 1 || files[0].type.indexOf("image") !== 0) {
+        console.log("画像ファイルではありません。");
+        return;
       }
       const file = files[0];
       let fileUrl = window.URL.createObjectURL(file);
       src.value = fileUrl;
       drawInitialCanvas();
-    }
-    const dragover = (event) =>{
+    };
+    const dragover = (event) => {
       event.preventDefault();
-    }
+    };
     /**
      * 画像をダウンロード
      */
@@ -270,34 +289,35 @@ export default defineComponent({
       let link = downloadLink.value;
       link.href = processedCanvas.value.toDataURL();
       link.click();
-    }
-
+    };
 
     /**
      * マウスイベント
      */
     const mousedown = (mouseEvent) => {
       var clientRect = originalCanvas.value.getBoundingClientRect();
-      range.value.start = (mouseEvent.clientY - clientRect.top ) / imageRatio.value
-      range.value.end = (mouseEvent.clientY - clientRect.top) / imageRatio.value
-    }
+      range.value.start =
+        (mouseEvent.clientY - clientRect.top) / imageRatio.value;
+      range.value.end =
+        (mouseEvent.clientY - clientRect.top) / imageRatio.value;
+    };
     const mouseup = (mouseEvent) => {
       var clientRect = originalCanvas.value.getBoundingClientRect();
-      range.value.end = (mouseEvent.clientY - clientRect.top) / imageRatio.value
-      process()
-    }
+      range.value.end =
+        (mouseEvent.clientY - clientRect.top) / imageRatio.value;
+      process();
+    };
     onMounted(() => {
       originalContext.value = originalCanvas.value.getContext("2d");
       processedContext.value = processedCanvas.value.getContext("2d");
     });
-    onUnmounted(() => {
-    });
+    onUnmounted(() => {});
 
     watch(src, () => {
-      setTimeout(()=>{
+      setTimeout(() => {
         drawInitialCanvas();
-      }, 100)
-    })
+      }, 100);
+    });
 
     // return
     return {
