@@ -8,6 +8,9 @@
     <v-btn v-show="src" @click="drawInitialCanvas()">original</v-btn>
     <v-btn v-show="src" @click="downloadImage()">download</v-btn>
     <v-row>
+      <v-overlay :value="!src" absolute>
+        画像をドロップもしくはペーストしてください。</v-overlay
+      >
       <v-col cols="12" md="6" lg="6" xl="6">
         original image
         <canvas
