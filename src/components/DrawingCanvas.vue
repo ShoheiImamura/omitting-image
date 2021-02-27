@@ -81,6 +81,7 @@ export default defineComponent({
     const downloadLink = ref();
     const imageRatio = ref();
     const onSelecting = ref(false);
+    const defaultCanvasWidth = ref(500);
 
     /**
      * 最初の表示
@@ -98,9 +99,10 @@ export default defineComponent({
       // 画像サイズ取得
       var imageWidth = originalImage.width;
       var imageHeight = originalImage.height;
-      originalCanvas.value.height = (imageHeight * 500) / imageWidth;
+      originalCanvas.value.height =
+        (imageHeight * defaultCanvasWidth.value) / imageWidth;
       // 比率取得
-      imageRatio.value = 500 / imageWidth;
+      imageRatio.value = defaultCanvasWidth.value / imageWidth;
 
       // 元イメージ描画
       originalContext.value.drawImage(
@@ -111,8 +113,8 @@ export default defineComponent({
         imageHeight,
         0,
         0,
-        500,
-        (imageHeight * 500) / imageWidth
+        defaultCanvasWidth.value,
+        (imageHeight * defaultCanvasWidth.value) / imageWidth
       );
     };
     /**
@@ -120,7 +122,7 @@ export default defineComponent({
      */
     const clearCanvas = (canvas) => {
       var context = canvas.getContext("2d");
-      canvas.width = 500;
+      canvas.width = defaultCanvasWidth.value;
       canvas.height = 1000;
       context.clearRect(0, 0, canvas.width, canvas.height);
     };
@@ -221,7 +223,7 @@ export default defineComponent({
       var processedImageWidth = processedImage.width;
       var processedImageHeight = processedImage.height;
       processedCanvas.value.height =
-        (processedImageHeight * 500) / processedImageWidth;
+        (processedImageHeight * defaultCanvasWidth.value) / processedImageWidth;
 
       setTimeout(() => {
         // 上部分を描画
@@ -229,7 +231,7 @@ export default defineComponent({
           processedContext.value,
           processedImage,
           range.value.start,
-          500
+          defaultCanvasWidth.value
         );
 
         // 下部分を描画
@@ -238,7 +240,7 @@ export default defineComponent({
           processedImage,
           range.value.start,
           range.value.end,
-          500
+          defaultCanvasWidth.value
         );
 
         // 間部分を描画;
@@ -246,7 +248,7 @@ export default defineComponent({
           processedContext.value,
           processedImage,
           range.value.start,
-          500
+          defaultCanvasWidth.value
         );
       }, 100);
     };
@@ -264,7 +266,8 @@ export default defineComponent({
       // 画像サイズ取得
       var imageWidth = originalOverlayImage.width;
       var imageHeight = originalOverlayImage.height;
-      originalOverlayCanvas.value.height = (imageHeight * 500) / imageWidth;
+      originalOverlayCanvas.value.height =
+        (imageHeight * defaultCanvasWidth.value) / imageWidth;
 
       // clip 領域の値を取得
       var mouseIndex = getYIndex(mouseEvent);
@@ -276,8 +279,8 @@ export default defineComponent({
       console.log("originalOverlayContext", originalOverlayContext.value);
       originalOverlayContext.value.beginPath();
       originalOverlayContext.value.moveTo(0, start);
-      originalOverlayContext.value.lineTo(500, start);
-      originalOverlayContext.value.lineTo(500, end);
+      originalOverlayContext.value.lineTo(defaultCanvasWidth.value, start);
+      originalOverlayContext.value.lineTo(defaultCanvasWidth.value, end);
       originalOverlayContext.value.lineTo(0, end);
       originalOverlayContext.value.closePath();
       originalOverlayContext.value.clip();
@@ -293,8 +296,8 @@ export default defineComponent({
         imageHeight,
         0,
         0,
-        500,
-        (imageHeight * 500) / imageWidth
+        defaultCanvasWidth.value,
+        (imageHeight * defaultCanvasWidth.value) / imageWidth
       );
     };
 
@@ -417,6 +420,7 @@ export default defineComponent({
       dropImage,
       dragover,
       downloadImage,
+      defaultCanvasWidth,
     };
   },
 });
